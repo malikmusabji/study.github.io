@@ -3,1029 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Large Flip Clock</title>
+    <title>Classcheck.in - Interactive Features V2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
+            font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 0;
+            background-color: #f0f4ff; /* Light blue background */
+            color: #4f46e5; /* Indigo text */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #000;
-            font-family: Arial, sans-serif; /* Base font */
-            color: #fff;
-            overflow: hidden;
+            padding: 20px;
+            overflow: hidden; /* Prevent scrollbars if container is large */
         }
 
-        .clock-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 96vw;
-            max-width: 1600px; /* Increased max width */
+        .feature-orbit-container {
             position: relative;
+            /* Size needs to be large enough to contain the center + orbiting items */
+            width: 450px;
+            height: 450px;
+            margin: 50px auto;
+            /* Optional: Add a visual guide for debugging */
+            /* border: 1px dashed red; */
         }
 
-        .flip-unit-container {
-            display: flex;
-            gap: 12px;
-            flex: 1;
-            justify-content: center;
-            transform: scale(1.3); /* Default larger size */
-            transition: transform 0.3s ease; /* Smooth zoom transition */
-        }
-
-        /* Card Styles */
-        .flip-card {
-            display: block;
-            position: relative;
-            width: clamp(160px, 48vw, 500px);
-            height: clamp(220px, 58vw, 600px);
-            perspective: 1200px;
-            background: #111;
-            border-radius: 32px; /* Increased corner radius */
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s ease;
-        }
-
-        .digit-top,
-        .digit-bottom,
-        .digit-top-flip,
-        .digit-bottom-flip {
+        .feature-orbit-center {
             position: absolute;
-            width: 100%;
-            height: 50%;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            background: #111;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.8) inset;
-        }
-
-        .digit-top {
-            align-items: flex-end;
-            top: 0;
-            z-index: 1;
-            border-bottom: 3px solid #000;
-            border-top-left-radius: 32px; /* Match parent */
-            border-top-right-radius: 32px; /* Match parent */
-        }
-
-        .digit-bottom {
-            align-items: flex-start;
-            bottom: 0;
-            z-index: 1;
-            border-top: 3px solid #000;
-            border-bottom-left-radius: 32px; /* Match parent */
-            border-bottom-right-radius: 32px; /* Match parent */
-        }
-
-        .digit {
-            font-size: clamp(130px, 40vw, 400px);
-            font-weight: bold;
-            /* Default font set via JS */
-            color: #c0c0c0;
-            line-height: clamp(220px, 58vw, 600px);
-            transform: scaleY(1.2) scaleX(0.85); /* Taller and narrower */
-            display: flex;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .digit-top .digit {
-            transform: translateY(50%) scaleY(1.2) scaleX(0.85);
-        }
-
-        .digit-bottom .digit {
-            transform: translateY(-50%) scaleY(1.2) scaleX(0.85);
-        }
-
-        /* Flip Animation Parts */
-        .digit-top-flip {
-            top: 0;
-            align-items: flex-end;
-            transform-origin: bottom;
-            transform: rotateX(0);
-            backface-visibility: hidden;
-            z-index: 2;
-            border-bottom: 3px solid #000;
-            border-top-left-radius: 32px; /* Match parent */
-            border-top-right-radius: 32px; /* Match parent */
-        }
-
-        .digit-bottom-flip {
-            bottom: 0;
-            align-items: flex-start;
-            transform-origin: top;
-            transform: rotateX(90deg);
-            backface-visibility: hidden;
-            z-index: 1; /* Changed from 2 to 1 */
-            border-top: 3px solid #000;
-            border-bottom-left-radius: 32px; /* Match parent */
-            border-bottom-right-radius: 32px; /* Match parent */
-        }
-
-        .digit-top-flip .digit {
-            transform: translateY(50%) scaleY(1.2) scaleX(0.85);
-        }
-
-        .digit-bottom-flip .digit {
-            transform: translateY(-50%) scaleY(1.2) scaleX(0.85);
-        }
-
-        .flip-card.flipping .digit-top-flip {
-            animation: flip-top 0.3s linear;
-            animation-fill-mode: forwards;
-        }
-
-        .flip-card.flipping .digit-bottom-flip {
-            animation: flip-bottom 0.3s linear 0.3s;
-            animation-fill-mode: forwards;
-            z-index: 2; /* Increase z-index during animation */
-        }
-
-        @keyframes flip-top {
-            0% {
-                transform: rotateX(0);
-                z-index: 2;
-            }
-            100% {
-                transform: rotateX(-90deg);
-                z-index: 2;
-            }
-        }
-
-        @keyframes flip-bottom {
-            0% {
-                transform: rotateX(90deg);
-                z-index: 1; /* Start behind */
-            }
-            100% {
-                transform: rotateX(0);
-                z-index: 2; /* End on top */
-            }
-        }
-
-        .am-pm {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            font-size: clamp(20px, 5vw, 40px);
-            font-weight: bold;
-            color: #c0c0c0;
-            z-index: 3;
-            /* Default font set via JS */
-            transition: all 0.3s ease;
-            display: block; /* Ensure it's visible initially */
-        }
-
-        /* Controls panel */
-        .controls {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
+            top: 50%;
+            left: 50%;
+            /* Translate needs to account for the element's own size */
+            transform: translate(-50%, -50%);
+            width: 200px; /* Adjusted size */
+            height: 200px;
+            border-radius: 50%;
+            border: 3px solid #4f46e5; /* Slightly thicker border */
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            z-index: 100;
-        }
-
-        .controls-toggle {
-            align-self: flex-end;
-            background: #222;
-            color: #888;
-            border: 1px solid #444;
-            border-radius: 3px;
-            font-size: 12px;
-            padding: 3px 6px;
-            cursor: pointer;
-        }
-
-        .controls-toggle:hover {
-            color: #fff;
-            border-color: #666;
-        }
-
-        .controls-panel {
-            display: none;
-            background: rgba(30, 30, 30, 0.85);
-            border-radius: 5px;
-            padding: 8px;
-            border: 1px solid #444;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        .controls-panel.visible {
-            display: block;
-        }
-
-        .control-group {
-            margin-bottom: 6px;
-        }
-
-        .control-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .control-label {
-            font-size: 10px;
-            color: #aaa;
-            margin-bottom: 3px;
-            display: block;
-        }
-
-        .control-input {
-            width: 100%;
-            background: #333;
-            color: #ddd;
-            border: 1px solid #555;
-            border-radius: 3px;
-            font-size: 10px;
-            padding: 2px 4px;
-        }
-
-        .zoom-buttons {
-            display: flex;
-            gap: 4px;
-        }
-
-        .zoom-button {
-            flex: 1;
-            background: #333;
-            color: #ddd;
-            border: 1px solid #555;
-            border-radius: 3px;
-            font-size: 10px;
-            padding: 2px 0;
-            cursor: pointer;
-        }
-
-        .zoom-button:hover {
-            background: #444;
-            color: #fff;
-        }
-
-        /* Font classes */
-        .font-impact { font-family: Impact, Charcoal, sans-serif; }
-        .font-arial-narrow { font-family: 'Arial Narrow', Arial, sans-serif; }
-        .font-arial { font-family: Arial, sans-serif; }
-        .font-helvetica { font-family: Helvetica, Arial, sans-serif; }
-        .font-digital { font-family: 'Segment7', 'DS-Digital', monospace; }
-        .font-oswald { font-family: 'Oswald', sans-serif; }
-        .font-montserrat { font-family: 'Montserrat', sans-serif; }
-        .font-roboto { font-family: 'Roboto', sans-serif; }
-        .font-bauhaus { font-family: 'Bauhaus 93', 'Arial Black', sans-serif; }
-
-        /* 10 additional fancy fonts */
-        .font-playfair { font-family: 'Playfair Display', serif; }
-        .font-merriweather { font-family: 'Merriweather', serif; }
-        .font-archivo { font-family: 'Archivo Black', sans-serif; }
-        .font-exo { font-family: 'Exo 2', sans-serif; }
-        .font-bungee { font-family: 'Bungee', cursive; }
-        .font-cinzel { font-family: 'Cinzel', serif; }
-        .font-staatliches { font-family: 'Staatliches', cursive; }
-        .font-press-start { font-family: 'Press Start 2P', cursive; }
-        .font-vt323 { font-family: 'VT323', monospace; }
-        .font-righteous { font-family: 'Righteous', cursive; }
-
-        /* Fullscreen Button */
-        .fullscreen-button {
-            position: absolute;
-            top: 10px;
-            right: 10px; /* Position near the message */
-            background: rgba(30, 30, 30, 0.85);
-            color: #ddd;
-            border: 1px solid #444;
-            border-radius: 5px;
-            padding: 5px 10px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex; /* Use flex for icon and text */
+            justify-content: center;
             align-items: center;
-            gap: 5px; /* Space between icon and text */
-            z-index: 101; /* Above controls */
-            transition: opacity 0.3s ease; /* Smooth hide/show */
+            text-align: center;
+            color: #4f46e5;
+            background-color: rgba(255, 255, 255, 0.5); /* White background with opacity */
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Added bounce effect */
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2), 0 0 0 5px rgba(79, 70, 229, 0.05); /* Enhanced shadow */
+            cursor: pointer;
+            z-index: 10; /* Ensure center is above items */
         }
 
-        .fullscreen-button:hover {
-            background: #444;
-            color: #fff;
+        .feature-orbit-center:hover {
+             /* Slightly larger scale on hover */
+            transform: translate(-50%, -50%) scale(1.1);
+            background-color: rgba(79, 70, 229, 0.1);
+            box-shadow: 0 15px 30px rgba(79, 70, 229, 0.3), 0 0 0 8px rgba(79, 70, 229, 0.1);
         }
 
-        .fullscreen-button .fa {
-            font-size: 14px; /* Adjust icon size */
+        .feature-orbit-center-title {
+            font-size: 1.5rem; /* Larger title */
+            font-weight: 600;
+            line-height: 1.2;
         }
 
-        /* Fullscreen message */
-        .fullscreen-message {
+        .feature-orbit-subtitle {
+            font-size: 0.8rem;
+            color: #6366f1; /* Slightly lighter indigo */
+            margin-top: 0.5rem;
+        }
+
+        .feature-orbit-item {
             position: absolute;
-            top: 45px; /* Position below the button */
-            right: 10px;
-            font-size: 12px;
-            color: #888;
-            font-family: Arial, sans-serif;
-            text-align: right;
-            display: none; /* Hide by default */
-            z-index: 100; /* Below button */
-            background: rgba(0,0,0,0.5); /* Slight background for visibility */
-            padding: 3px 5px;
-            border-radius: 3px;
+            /* Center the item before transforming */
+            top: 50%; /* Position relative to container center */
+            left: 50%; /* Position relative to container center */
+            width: 70px; /* Icon container size */
+            height: 70px; /* Icon container size */
+            /* Margin offset is removed here, transform handles positioning */
+            /* margin: -35px 0 0 -35px; */
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.6); /* Slightly more opaque */
+            transition: all 0.3s ease-in-out, opacity 0.3s ease; /* Added opacity transition */
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(79, 70, 229, 0.2); /* Indigo border */
+            backdrop-filter: blur(5px);
+            transform-origin: center center; /* Ensure scaling happens from the center */
+            /* transform set by JS */
         }
 
-        /* Media queries for different devices */
-        @media (max-width: 768px) {
-            .clock-container {
-                width: 98vw;
-            }
-
-            .flip-unit-container {
-                gap: 6px;
-            }
-
-            .am-pm {
-                bottom: 15px;
-                left: 15px;
-            }
+        /* New class for fading siblings */
+        .feature-orbit-container.is-hovering .feature-orbit-item:not(:hover) {
+            opacity: 0.6;
+            /* We need to re-apply the base transform + scale */
+            /* JS will handle combining transforms */
         }
 
-        /* Vertical layout for mobile devices */
-        @media (max-width: 600px), (orientation: portrait) {
-            body {
-                align-items: center; /* Center vertically */
-            }
-
-            .clock-container {
-                height: 100vh; /* Full height */
-                align-items: center; /* Center vertically */
-                justify-content: center;
-            }
-
-            .flip-unit-container {
-                flex-direction: column !important; /* Force column layout */
-                gap: 16px !important;
-                transform: scale(1.3) !important; /* Increase scale for mobile */
-                align-items: center; /* Center horizontally */
-                height: 90vh; /* Almost full height */
-                justify-content: center; /* Center vertically */
-            }
-
-            .flip-card {
-                width: 90vw !important; /* Use more screen width */
-                height: 35vh !important; /* Taller cards */
-                max-height: none; /* Remove height limitation */
-            }
-
-            .digit {
-                font-size: 25vh !important; /* Size relative to viewport height */
-                line-height: 35vh !important; /* Match flip-card height */
-            }
-
-            .am-pm {
-                bottom: 10px;
-                left: auto !important; /* Override JavaScript positioning */
-                right: 10px !important; /* Override JavaScript positioning */
-                font-size: 8vh; /* Larger size for better visibility */
-            }
-
-            .controls {
-                bottom: 10px;
-                left: 10px;
-                right: auto;
-            }
+        .feature-orbit-item:hover {
+            /* transform is handled by JS now, just enhance visuals */
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.2);
+            border-color: #4f46e5;
+            z-index: 5; /* Bring hovered item slightly forward */
+            /* Scale is applied by JS */
         }
 
-        /* Digital font */
-        @font-face {
-            font-family: 'Segment7';
-            src: url('https://cdnjs.cloudflare.com/ajax/libs/Seven-Segment/1.0.0/Seven-Segment.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
+        .feature-orbit-icon {
+            width: 35px; /* Adjusted icon size */
+            height: 35px;
         }
+
+        /* Active state - more pronounced */
+        .feature-orbit-item.active {
+            /* Keep scale effect from JS, add glow */
+            background-color: #10b981; /* Emerald green */
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.8), 0 0 10px rgba(255, 255, 255, 0.5) inset;
+            border-color: #6ee7b7;
+            animation: pulse 0.6s ease-out;
+        }
+
+        /* Pulse animation for click */
+        @keyframes pulse {
+            /* JS applies scale(1.2) on hover/active, so pulse relative to that */
+             0% { transform: scale(1.2); } /* Start from hover scale */
+             50% { transform: scale(1.4); } /* Pulse bigger */
+            100% { transform: scale(1.2); } /* Return to hover scale */
+            /* Note: Transform needs to be combined with positioning in JS */
+        }
+
+
+        /* Rotation animation for the center */
+        @keyframes rotateCenter {
+            from { transform: translate(-50%, -50%) rotate(0deg) scale(1.1); } /* Keep scale during rotation */
+            to { transform: translate(-50%, -50%) rotate(360deg) scale(1.1); }
+        }
+
+        .feature-orbit-center.rotate {
+            /* Use a shorter, smoother rotation */
+            animation: rotateCenter 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
     </style>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Montserrat:wght@700&family=Roboto:wght@700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Merriweather:wght@700&family=Archivo+Black&family=Exo+2:wght@800&family=Bungee&family=Cinzel:wght@700&family=Staatliches&family=Press+Start+2P&family=VT323&family=Righteous&display=swap" rel="stylesheet">
 </head>
-<body>
-    <div class="fullscreen-message" id="fullscreenMessage">Press F11 for fullscreen</div>
+<body class="bg-gray-100 text-gray-900">
+    <div class="feature-orbit-container" id="orbit-container">
+        <div class="feature-orbit-center" id="orbit-center">
+            </div>
 
-    <button class="fullscreen-button" id="fullscreenButton">
-        <i class="fa fa-expand"></i> <span>Go fullscreen</span>
-    </button>
-
-    <div class="clock-container">
-        <div class="flip-unit-container">
-            <div class="flip-card" id="hour-card">
-                <div class="am-pm" id="ampm">PM</div>
-                <div class="digit-top">
-                    <div class="digit">00</div> </div>
-                <div class="digit-bottom">
-                    <div class="digit">00</div> </div>
-                <div class="digit-top-flip">
-                    <div class="digit">00</div> </div>
-                <div class="digit-bottom-flip">
-                    <div class="digit">00</div> </div>
-            </div>
-            <div class="flip-card" id="minute-card">
-                <div class="digit-top">
-                    <div class="digit">00</div>
-                </div>
-                <div class="digit-bottom">
-                    <div class="digit">00</div>
-                </div>
-                <div class="digit-top-flip">
-                    <div class="digit">00</div>
-                </div>
-                <div class="digit-bottom-flip">
-                    <div class="digit">00</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="controls">
-        <button class="controls-toggle" id="controlsToggle">⚙</button>
-        <div class="controls-panel" id="controlsPanel">
-            <div class="control-group">
-                <span class="control-label">Zoom</span>
-                <div class="zoom-buttons">
-                    <button class="zoom-button" data-zoom="0.8">-</button>
-                    <button class="zoom-button" data-zoom="1.0">Reset</button>
-                    <button class="zoom-button" data-zoom="1.2">+</button>
-                </div>
-            </div>
-            <div class="control-group">
-                <span class="control-label">Font</span>
-                <select class="control-input" id="fontSelect">
-                    <option value="font-impact">Impact</option>
-                    <option value="font-arial-narrow">Arial Narrow</option>
-                    <option value="font-arial">Arial</option>
-                    <option value="font-helvetica">Helvetica</option>
-                    <option value="font-digital">Digital</option>
-                    <option value="font-oswald">Oswald</option>
-                    <option value="font-montserrat">Montserrat</option>
-                    <option value="font-roboto">Roboto</option>
-                    <option value="font-bauhaus">Bauhaus</option>
-                    <option value="font-playfair">Playfair Display</option>
-                    <option value="font-merriweather">Merriweather</option>
-                    <option value="font-archivo">Archivo Black</option>
-                    <option value="font-exo">Exo 2</option>
-                    <option value="font-bungee">Bungee</option>
-                    <option value="font-cinzel">Cinzel</option>
-                    <option value="font-staatliches">Staatliches</option>
-                    <option value="font-press-start">Press Start 2P</option>
-                    <option value="font-vt323">VT323</option>
-                    <option value="font-righteous">Righteous</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <span class="control-label">Format</span>
-                <select class="control-input" id="formatSelect">
-                    <option value="12">12-hour</option>
-                    <option value="24">24-hour</option>
-                </select>
-            </div>
-        </div>
+        <div class="feature-orbit-item" data-feature="quiz">
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/zap.svg" alt="AI Quizzes" class="feature-orbit-icon" style="color: #f59e0b;"> </div>
+        <div class="feature-orbit-item" data-feature="attendance">
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/check-circle-2.svg" alt="QR Attendance" class="feature-orbit-icon" style="color: #3b82f6;"> </div>
+        <div class="feature-orbit-item" data-feature="notes">
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/file-text.svg" alt="Smart Notes" class="feature-orbit-icon" style="color: #ec4899;"> </div>
+        <div class="feature-orbit-item" data-feature="tutor">
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/brain-circuit.svg" alt="AI Tutor" class="feature-orbit-icon" style="color: #10b981;"> </div>
+        <div class="feature-orbit-item" data-feature="analytics">
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/bar-chart-4.svg" alt="Analytics" class="feature-orbit-icon" style="color: #8b5cf6;"> </div>
+        <div class="feature-orbit-item" data-feature="flashcard">
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/layers.svg" alt="Flashcard Generator" class="feature-orbit-icon" style="color:#f97316"> </div>
+        <div class="feature-orbit-item" data-feature="aiquiz">
+             <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/file-question.svg" alt="AI Quiz Generator" class="feature-orbit-icon" style="color:#84cc16"> </div>
+        <div class="feature-orbit-item" data-feature="simulation">
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/computer.svg" alt="Simulations" class="feature-orbit-icon" style="color:#0ea5e9"> </div>
     </div>
 
     <script>
-        // Global variables
-        let is24HourFormat = false;
-        let lastHour = "-1"; // Store as string for comparison
-        let lastMinute = "-1"; // Store as string for comparison
-        let animationInProgress = false;
-        let currentZoom = 1.3; // Start with larger default zoom
-        let currentFont = 'font-impact'; // Default font set to Impact
-        let isFullscreen = false;
-        let isPortrait = false;
-        let fullscreenButtonTimeout;
+        // Get references to DOM elements
+        const orbitContainer = document.getElementById('orbit-container');
+        const orbitCenter = document.getElementById('orbit-center');
+        const orbitItems = document.querySelectorAll('.feature-orbit-item');
 
-        // Get DOM elements
-        const hourCard = document.getElementById('hour-card');
-        const minuteCard = document.getElementById('minute-card');
-        const ampmElement = document.getElementById('ampm');
-        const controlsToggle = document.getElementById('controlsToggle');
-        const controlsPanel = document.getElementById('controlsPanel');
-        const zoomButtons = document.querySelectorAll('.zoom-button');
-        const fontSelect = document.getElementById('fontSelect');
-        const formatSelect = document.getElementById('formatSelect');
-        const fullscreenMessage = document.getElementById('fullscreenMessage');
-        const fullscreenButton = document.getElementById('fullscreenButton');
-        const flipUnitContainer = document.querySelector('.flip-unit-container');
+        // Store the default HTML content for the center element
+        const defaultCenterHTML = `
+            <div class="feature-orbit-center-title">Classcheck.in</div>
+            <p class="feature-orbit-subtitle">Your AI Classroom Assistant</p>
+        `;
 
-        // --- Fullscreen Handling ---
-
-        // Attempt to enter fullscreen mode
-        function enterFullscreen() {
-            const element = document.documentElement; // Target the whole page
-
-            try {
-                // Standard API
-                if (element.requestFullscreen) {
-                    element.requestFullscreen();
-                // Webkit (Chrome, Safari, Edge Chromium)
-                } else if (element.webkitRequestFullscreen) {
-                    element.webkitRequestFullscreen();
-                // MS (IE11)
-                } else if (element.msRequestFullscreen) {
-                    element.msRequestFullscreen();
-                // Mozilla (Firefox)
-                } else if (element.mozRequestFullScreen) { // Note the capitalization
-                    element.mozRequestFullScreen();
-                }
-                console.log("Attempting to enter fullscreen");
-            } catch (err) {
-                console.error("Fullscreen API error:", err);
-                // Show message about using F11 if the API fails
-                showFullscreenMessage("Fullscreen API failed. Please use F11 key.");
+        // Function to get the title for a feature based on its data attribute
+        function getFeatureTitle(feature) {
+            switch (feature) {
+                case "quiz": return "AI Quizzes";
+                case "attendance": return "QR Attendance";
+                case "notes": return "Smart Notes";
+                case "tutor": return "AI Tutor (A.Xel)";
+                case "analytics": return "Analytics";
+                case "flashcard": return "Flashcards";
+                case "aiquiz": return "AI Quiz Gen";
+                case "simulation": return "Simulations";
+                default: return "Classcheck.in"; // Fallback
             }
         }
 
-        // Attempt to exit fullscreen mode
-        function exitFullscreen() {
-            try {
-                // Standard API
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                // Webkit
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                // MS
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                // Mozilla
-                } else if (document.mozCancelFullScreen) { // Note the capitalization
-                    document.mozCancelFullScreen();
-                }
-                console.log("Attempting to exit fullscreen");
-            } catch (err) {
-                console.error("Exit fullscreen error:", err);
-                 // Show message about using Escape or F11 if API fails
-                showFullscreenMessage("Exit fullscreen failed. Please use Escape or F11 key.");
-            }
+        // Function to update the central text element
+        function updateCenterText(title, subtitle = null) {
+            orbitCenter.innerHTML = `
+                <div class="feature-orbit-center-title">${title}</div>
+                ${subtitle ? `<p class="feature-orbit-subtitle">${subtitle}</p>` : ''}
+            `;
         }
 
-        // Toggle fullscreen state based on current status
-        function toggleFullscreen() {
-            // Use screen dimensions as a secondary detection method for robustness
-            const screenIsFullSize =
-                window.innerWidth === screen.width &&
-                window.innerHeight === screen.height;
-
-            // If not currently fullscreen (by API or dimensions), enter fullscreen
-            if (!isFullscreen && !screenIsFullSize) {
-                enterFullscreen();
-            } else { // Otherwise, exit fullscreen
-                exitFullscreen();
-            }
+        // Function to set the transform style for an item, combining position and scale
+        function setItemTransform(item, x, y, scale = 1) {
+             // Apply the transform to position the item relative to the container center
+             // translate(-50%, -50%) centers the item *itself* on the calculated (x, y) point
+            item.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale})`;
         }
 
-        // Add click event listener to the fullscreen button
-        fullscreenButton.addEventListener('click', toggleFullscreen);
 
-        // Show the fullscreen message temporarily
-        function showFullscreenMessage(message = "Press F11 for fullscreen") {
-            fullscreenMessage.textContent = message;
-            fullscreenMessage.style.display = 'block';
+        // Function to position items circularly
+        function positionItems() {
+            // Use the central circle's size to determine the orbit radius
+            const centerRadius = orbitCenter.offsetWidth / 2;
+            // Get the size of the orbiting items (assuming they are uniform)
+            const itemRadius = orbitItems[0] ? orbitItems[0].offsetWidth / 2 : 35; // Default to 35 if needed
+            // Calculate the final orbit radius: center radius + item radius + a small gap
+            const gap = 10; // Adjust this value for spacing between center and items
+            const orbitRadius = centerRadius + itemRadius + gap;
 
-            // Automatically hide the message after 4 seconds
-            setTimeout(() => {
-                // Check if it should still be hidden (e.g., if entered fullscreen)
-                if (!isFullscreen && !isPortrait) {
-                   fullscreenMessage.style.display = 'none';
-                }
-            }, 4000);
+            const itemCount = orbitItems.length;
+            const angleIncrement = (2 * Math.PI) / itemCount; // Angle between items
+
+            orbitItems.forEach((item, index) => {
+                // Calculate angle for this item (offset by -PI/2 to start at the top)
+                const angle = index * angleIncrement - Math.PI / 2;
+
+                // Calculate x and y coordinates relative to the container's center
+                const x = orbitRadius * Math.cos(angle);
+                const y = orbitRadius * Math.sin(angle);
+
+                // Apply the transform using the helper function (default scale is 1)
+                setItemTransform(item, x, y);
+
+                // Store calculated position and angle for easy access later
+                item.dataset.baseX = x;
+                item.dataset.baseY = y;
+                item.dataset.angle = angle;
+            });
         }
 
-        // Enhanced fullscreen detection using multiple approaches
-        function checkFullscreen() {
-            const wasFullscreen = isFullscreen; // Store previous state
+        // Set initial state
+        updateCenterText("Classcheck.in", "Your AI Classroom Assistant");
+        // Ensure positioning happens after styles are applied and layout is calculated
+        window.onload = () => {
+             positionItems(); // Position items on load
+        };
 
-            // Primary method: Check fullscreen API status across browsers
-            const apiFullscreen = Boolean(
-                document.fullscreenElement ||
-                document.webkitFullscreenElement ||
-                document.mozFullScreenElement || // Note the capitalization
-                document.msFullscreenElement
-            );
 
-            // Secondary method: Compare window dimensions to screen dimensions
-            // This helps catch cases where the API might be unreliable or events missed
-            const dimensionFullscreen =
-                window.innerWidth >= screen.width - 2 && // Allow small tolerance
-                window.innerHeight >= screen.height - 2; // Allow small tolerance
+        // Add event listeners to each orbiting item
+        orbitItems.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const feature = item.dataset.feature;
+                const title = getFeatureTitle(feature);
+                updateCenterText(title); // Update center text to feature title
+                orbitContainer.classList.add('is-hovering'); // Add class for sibling effects
 
-            // Combine detection methods: Primarily rely on API, use dimensions as fallback/confirmation
-            isFullscreen = apiFullscreen || dimensionFullscreen;
+                // Apply hover scale using the setItemTransform function
+                const x = parseFloat(item.dataset.baseX);
+                const y = parseFloat(item.dataset.baseY);
+                setItemTransform(item, x, y, 1.2); // Scale to 1.2
 
-            // Specific edge case handling for Firefox (sometimes dimension check is more reliable)
-            if (navigator.userAgent.includes("Firefox")) {
-                if (dimensionFullscreen && !apiFullscreen) {
-                    isFullscreen = true; // Trust dimension check if API disagrees
-                }
-            }
-
-            console.log(`Fullscreen check - API: ${apiFullscreen}, Dimensions: ${dimensionFullscreen}, Combined: ${isFullscreen}`);
-
-            // Update the UI elements (button icon/text, message visibility)
-            updateFullscreenUI();
-
-            // Log if the fullscreen state actually changed
-            if (wasFullscreen !== isFullscreen) {
-                console.log(`Fullscreen state changed: ${isFullscreen ? 'Entered fullscreen' : 'Exited fullscreen'}`);
-            }
-        }
-
-        // Update UI elements based on the current fullscreen state
-        function updateFullscreenUI() {
-            const buttonIcon = fullscreenButton.querySelector('.fa');
-            const buttonText = fullscreenButton.querySelector('span');
-
-            if (isFullscreen) {
-                // Update button to "Exit Fullscreen"
-                buttonIcon.classList.remove('fa-expand');
-                buttonIcon.classList.add('fa-compress');
-                buttonText.textContent = 'Exit fullscreen';
-                fullscreenMessage.style.display = 'none'; // Hide message when fullscreen
-
-                // Auto-hide the fullscreen button after a delay when in fullscreen
-                fullscreenButton.style.opacity = '0.8'; // Make it slightly visible initially
-                if (fullscreenButtonTimeout) clearTimeout(fullscreenButtonTimeout); // Clear previous timeout
-                fullscreenButtonTimeout = setTimeout(() => {
-                    fullscreenButton.style.opacity = '0'; // Fade out
-                }, 2000); // Hide after 2 seconds of inactivity
-            } else {
-                // Update button to "Go Fullscreen"
-                buttonIcon.classList.remove('fa-compress');
-                buttonIcon.classList.add('fa-expand');
-                buttonText.textContent = 'Go fullscreen';
-
-                // Show the F11 message only if not fullscreen AND not in portrait mode
-                if (!isPortrait) {
-                    showFullscreenMessage();
-                } else {
-                    fullscreenMessage.style.display = 'none'; // Ensure hidden in portrait
-                }
-
-                // Make the button fully visible when not in fullscreen
-                fullscreenButton.style.opacity = '1';
-                if (fullscreenButtonTimeout) clearTimeout(fullscreenButtonTimeout); // Clear hide timeout
-            }
-
-             // Add/remove mouse tracking for showing/hiding the button in fullscreen
-            if (isFullscreen) {
-                document.addEventListener('mousemove', checkMousePosition);
-                // Initially hide the button after a short delay if mouse isn't moving
-                if (fullscreenButtonTimeout) clearTimeout(fullscreenButtonTimeout);
-                 fullscreenButtonTimeout = setTimeout(() => {
-                    fullscreenButton.style.opacity = '0';
-                }, 2000);
-            } else {
-                document.removeEventListener('mousemove', checkMousePosition);
-                fullscreenButton.style.display = 'flex'; // Ensure button is visible
-                fullscreenButton.style.opacity = '1'; // Ensure full opacity
-            }
-        }
-
-        // Show/hide the fullscreen button based on mouse position (only when fullscreen)
-        function checkMousePosition(e) {
-            if (!isFullscreen) return; // Only run when fullscreen
-
-            // Define the trigger area (top-right corner)
-            const triggerArea = 100; // Pixels from the top and right edges
-
-            // If mouse is in the trigger area
-            if (e.clientX > window.innerWidth - triggerArea && e.clientY < triggerArea) {
-                fullscreenButton.style.display = 'flex'; // Ensure it's displayed
-                fullscreenButton.style.opacity = '0.8'; // Make it visible
-
-                // Clear any existing hide timeout
-                if (fullscreenButtonTimeout) clearTimeout(fullscreenButtonTimeout);
-            } else {
-                // If mouse is outside the trigger area, start a timer to hide the button
-                if (fullscreenButtonTimeout) clearTimeout(fullscreenButtonTimeout); // Clear previous timeout
-                fullscreenButtonTimeout = setTimeout(() => {
-                    fullscreenButton.style.opacity = '0'; // Fade out
-                }, 1500); // Hide after 1.5 seconds
-            }
-        }
-
-        // Listen for F11 key presses to manually trigger a fullscreen check
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'F11') {
-                // Prevent default browser behavior if needed (optional)
-                // e.preventDefault();
-
-                // Update our internal state after a short delay, as the browser takes time
-                setTimeout(checkFullscreen, 100);
-
-                // Double-check using dimensions after a longer delay for more reliability
-                setTimeout(() => {
-                    const dimensionCheck =
-                        window.innerWidth >= screen.width - 2 &&
-                        window.innerHeight >= screen.height - 2;
-
-                    // If the dimension check disagrees with our current state, trust the dimensions
-                    if (dimensionCheck !== isFullscreen) {
-                        console.log("F11 dimension check correcting state.");
-                        isFullscreen = dimensionCheck;
-                        updateFullscreenUI();
+                // Apply shrink effect to siblings
+                orbitItems.forEach(sibling => {
+                    if (sibling !== item) {
+                        const sx = parseFloat(sibling.dataset.baseX);
+                        const sy = parseFloat(sibling.dataset.baseY);
+                        setItemTransform(sibling, sx, sy, 0.9); // Scale down siblings
                     }
-                }, 500);
-            } else if (e.key === 'Escape' && isFullscreen) {
-                // Listen for Escape key press when we think we are in fullscreen
-                // The browser handles exiting, but we need to update our state
-                 setTimeout(checkFullscreen, 100); // Check state shortly after Escape press
-            }
-        });
+                });
+            });
 
-        // Add event listeners for fullscreen API changes
-        document.addEventListener('fullscreenchange', checkFullscreen);
-        document.addEventListener('webkitfullscreenchange', checkFullscreen);
-        document.addEventListener('mozfullscreenchange', checkFullscreen);
-        document.addEventListener('MSFullscreenChange', checkFullscreen);
+            item.addEventListener('mouseleave', () => {
+                updateCenterText("Classcheck.in", "Your AI Classroom Assistant"); // Restore default text
+                orbitContainer.classList.remove('is-hovering'); // Remove sibling effect class
 
-        // Periodic check for fullscreen state (fallback mechanism)
-        // This helps catch state changes missed by events (e.g., browser inconsistencies)
-        setInterval(() => {
-            // Check based on dimensions
-            const dimensionFullscreen =
-                window.innerWidth >= screen.width - 2 &&
-                window.innerHeight >= screen.height - 2;
+                 // Restore normal scale using the setItemTransform function for all items
+                 orbitItems.forEach(anyItem => {
+                    const x = parseFloat(anyItem.dataset.baseX);
+                    const y = parseFloat(anyItem.dataset.baseY);
+                    setItemTransform(anyItem, x, y, 1); // Restore scale 1
+                 });
+            });
 
-            // If the dimension check indicates a state different from our tracked state, update
-            if (dimensionFullscreen !== isFullscreen) {
-                console.log(`Periodic check detected fullscreen discrepancy. Updating state to: ${dimensionFullscreen}`);
-                isFullscreen = dimensionFullscreen;
-                updateFullscreenUI();
-            }
-        }, 2000); // Check every 2 seconds
+            item.addEventListener('click', () => {
+                const feature = item.dataset.feature;
+                console.log(`Clicked on feature: ${feature}`); // Log the clicked feature
 
-        // --- Controls ---
+                // --- Click Visual Feedback ---
+                // 1. Add 'active' class for pulse animation and styling
+                // Note: The pulse animation keyframes might need adjustment
+                // as they assume a specific starting scale. JS now handles scale directly.
+                item.classList.add('active');
 
-        // Toggle visibility of the controls panel
-        controlsToggle.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent click from immediately closing panel
-            controlsPanel.classList.toggle('visible');
-        });
-
-        // Hide controls panel when clicking anywhere else on the page
-        document.addEventListener('click', (e) => {
-            // Check if the click was outside the controls area AND the panel is visible
-            if (!e.target.closest('.controls') && controlsPanel.classList.contains('visible')) {
-                controlsPanel.classList.remove('visible');
-            }
-        });
-
-        // --- Orientation Handling ---
-
-        // Check and apply styles based on screen orientation
-        function checkOrientation() {
-            const wasPortrait = isPortrait; // Store previous state
-            // Determine if portrait mode by comparing window height and width
-            isPortrait = window.innerHeight > window.innerWidth;
-
-            // Update fullscreen message display logic when orientation changes
-            if (wasPortrait !== isPortrait) {
-                console.log("Orientation changed. Portrait:", isPortrait);
-                // Show message only if landscape and not fullscreen
-                if (!isFullscreen && !isPortrait) {
-                    showFullscreenMessage();
-                } else {
-                    fullscreenMessage.style.display = 'none'; // Hide otherwise
-                }
-            }
-
-            // Adjust AM/PM indicator position based on orientation
-            if (isPortrait) {
-                // Move to top-right in portrait mode (CSS handles this via !important)
-                 ampmElement.style.right = '10px';
-                 ampmElement.style.left = 'auto';
-            } else {
-                // Position bottom-left in landscape mode
-                ampmElement.style.left = '20px';
-                ampmElement.style.right = 'auto';
-            }
-
-            // Reapply zoom transformation, but only if not in portrait mode
-            // CSS rules with !important handle scaling in portrait mode
-            if (!isPortrait) {
-                flipUnitContainer.style.transform = `scale(${currentZoom})`;
-            } else {
-                 // Ensure transform is reset if switching to portrait, letting CSS take over
-                 flipUnitContainer.style.transform = '';
-            }
-        }
-
-        // Listen for window resize and orientation change events
-        window.addEventListener('resize', () => {
-            checkOrientation();
-            checkFullscreen(); // Also re-check fullscreen state on resize
-        });
-
-        window.addEventListener('orientationchange', () => {
-            // Use a timeout to ensure the browser has fully applied the orientation change
-            setTimeout(() => {
-                checkOrientation();
-                checkFullscreen();
-            }, 100);
-        });
-
-        // --- Clock Customization ---
-
-        // Zoom controls functionality
-        zoomButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const zoomValue = parseFloat(button.dataset.zoom);
-                if (button.innerText === 'Reset') {
-                    currentZoom = 1.3; // Reset to the default larger zoom
-                } else {
-                    // Apply zoom multiplier (increase or decrease)
-                    currentZoom *= zoomValue;
-                    // Clamp zoom level to prevent extreme values (optional)
-                    currentZoom = Math.max(0.5, Math.min(currentZoom, 3.0));
+                // 2. Vibrate if supported
+                if ("vibrate" in navigator) {
+                    navigator.vibrate(50); // Short vibration
                 }
 
-                // Apply the zoom transformation only if not in portrait mode
-                if (!isPortrait) {
-                    flipUnitContainer.style.transform = `scale(${currentZoom})`;
-                }
+                // 3. Rotate the center element
+                orbitCenter.classList.add('rotate');
+
+                // --- Reset Animations ---
+                // Remove rotation class after animation duration (1s)
+                setTimeout(() => {
+                    orbitCenter.classList.remove('rotate');
+                }, 1000);
+
+                // Remove active class shortly after pulse animation (0.6s)
+                // Also ensure scale returns to normal or hover state
+                setTimeout(() => {
+                    item.classList.remove('active');
+                    const x = parseFloat(item.dataset.baseX);
+                    const y = parseFloat(item.dataset.baseY);
+                    // If still hovering, maintain hover scale, otherwise return to normal
+                    const currentScale = item.matches(':hover') ? 1.2 : 1;
+                    setItemTransform(item, x, y, currentScale);
+
+                }, 600);
+
+                // Keep the center text updated briefly during the click animation
+                updateCenterText(getFeatureTitle(feature));
             });
         });
 
-        // Font selection functionality
-        fontSelect.addEventListener('change', () => {
-            const selectedFont = fontSelect.value;
-
-            // Update font class on all relevant elements
-            document.querySelectorAll('.digit, .am-pm').forEach(element => {
-                element.classList.remove(currentFont); // Remove the old font class
-                element.classList.add(selectedFont); // Add the new font class
-            });
-
-            currentFont = selectedFont; // Store the currently selected font class
-        });
-
-        // Time format selection (12/24 hour)
-        formatSelect.addEventListener('change', () => {
-            is24HourFormat = formatSelect.value === '24';
-            updateClock(true); // Force an immediate clock update to reflect the new format
-        });
-
-        // --- Clock Update Logic ---
-
-        // Function to animate a single flip card
-        function updateCard(card, currentValue, nextValue) {
-             // Ensure values are strings for textContent
-            const currentValStr = String(currentValue);
-            const nextValStr = String(nextValue);
-
-            // Get the elements involved in the flip animation
-            const digitTop = card.querySelector('.digit-top .digit');
-            const digitBottom = card.querySelector('.digit-bottom .digit');
-            const digitTopFlip = card.querySelector('.digit-top-flip .digit');
-            const digitBottomFlip = card.querySelector('.digit-bottom-flip .digit');
-
-            // If the value hasn't changed, do nothing
-            if (digitTop.textContent === nextValStr) {
-                return;
-            }
-
-            // Set the 'before' state for the flip animation
-            digitTop.textContent = currentValStr; // Static top shows current value
-            digitBottomFlip.textContent = currentValStr; // Bottom flip part starts with current value (hidden initially)
-
-            // Set the 'after' state for the flip animation
-            digitTopFlip.textContent = nextValStr; // Top flip part shows the next value
-            digitBottom.textContent = nextValStr; // Static bottom shows the next value
-
-            // Trigger the animation by adding the 'flipping' class
-            card.classList.add('flipping');
-            animationInProgress = true; // Set flag
-
-            // After the animation duration, remove the class and reset state
-            setTimeout(() => {
-                // Ensure the static parts display the new value
-                digitTop.textContent = nextValStr;
-                digitBottom.textContent = nextValStr;
-
-                card.classList.remove('flipping'); // Remove animation class
-                animationInProgress = false; // Reset flag
-            }, 600); // Matches the total CSS animation duration (0.3s + 0.3s)
-        }
-
-
-        // Initialize a card with a starting value (no animation)
-        function initCard(card, value) {
-            const valueStr = String(value); // Ensure it's a string
-            const digits = card.querySelectorAll('.digit');
-            digits.forEach(digit => digit.textContent = valueStr);
-        }
-
-        // Format a number with leading zeros (e.g., 5 -> "05")
-        function formatNumber(num, width) {
-            return num.toString().padStart(width, '0');
-        }
-
-        // Main function to update the clock display
-        function updateClock(forceUpdate = false) {
-            // Prevent updates if an animation is already in progress, unless forced
-            if (animationInProgress && !forceUpdate) return;
-
-            const now = new Date();
-            let hours = now.getHours();
-            const minutes = now.getMinutes();
-            let ampm = 'AM'; // Default to AM
-
-            // Handle 12-hour format conversion and AM/PM
-            if (!is24HourFormat) {
-                if (hours >= 12) {
-                    ampm = 'PM'; // Set PM if hour is 12 or more
-                }
-                if (hours > 12) {
-                    hours -= 12; // Convert hours > 12 to 1-11
-                }
-                if (hours === 0) {
-                    hours = 12; // Convert hour 0 (midnight) to 12
-                }
-                ampmElement.textContent = ampm; // Update AM/PM display
-                ampmElement.style.display = 'block'; // Ensure visible
-            } else {
-                ampmElement.style.display = 'none'; // Hide AM/PM in 24-hour format
-            }
-
-            // Format hours and minutes with leading zeros
-            const formattedHours = formatNumber(hours, is24HourFormat ? 2 : 1); // Pad hours only if 24h or needed for 12h (e.g. 01-09) - adjusted logic below
-            const formattedMinutes = formatNumber(minutes, 2);
-
-
-            // Determine hour display based on format
-            let hourDisplay;
-             if (is24HourFormat) {
-                hourDisplay = formatNumber(hours, 2); // Always 2 digits for 24h
-            } else {
-                hourDisplay = String(hours); // Use 1 or 2 digits for 12h (e.g., "9", "12")
-            }
-
-
-            // Initial setup: Set values without animation
-            if (lastHour === "-1" || forceUpdate) { // Use "-1" as initial flag
-                initCard(hourCard, hourDisplay);
-                initCard(minuteCard, formattedMinutes);
-                lastHour = hourDisplay;
-                lastMinute = formattedMinutes;
-                if (!forceUpdate) return; // Don't proceed to animation on first load unless forced
-            }
-
-            // Update cards only if values have changed
-            if (hourDisplay !== lastHour) {
-                updateCard(hourCard, lastHour, hourDisplay);
-                lastHour = hourDisplay;
-            }
-
-            if (formattedMinutes !== lastMinute) {
-                updateCard(minuteCard, lastMinute, formattedMinutes);
-                lastMinute = formattedMinutes;
-            }
-        }
-
-        // Initialize the clock when the page loads
-        function initClock() {
-            // Apply the default font class to digits and AM/PM
-            document.querySelectorAll('.digit, .am-pm').forEach(element => {
-                element.classList.add(currentFont);
-            });
-
-            // Perform initial orientation and fullscreen checks
-            checkOrientation();
-            checkFullscreen(); // This also calls updateFullscreenUI
-
-            // Set the initial time without animation
-            updateClock(true); // Force update to initialize display
-
-            // Start the interval timer to update the clock every second
-            setInterval(() => {
-                 // Only call updateClock if not forced (avoids conflict with manual updates)
-                if (!animationInProgress) {
-                    updateClock();
-                }
-            }, 1000); // Check every second
-
-            // Show the initial fullscreen message if appropriate
-            // updateFullscreenUI handles this based on initial state
-        }
-
-        // Start the clock initialization process once the window is fully loaded
-        window.addEventListener('load', initClock);
+        // Reposition items on window resize to maintain layout
+        window.addEventListener('resize', positionItems);
 
     </script>
 </body>
