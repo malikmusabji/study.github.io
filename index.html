@@ -26,15 +26,12 @@
             width: 450px;
             height: 450px;
             margin: 50px auto;
-            /* Optional: Add a visual guide for debugging */
-            /* border: 1px dashed red; */
         }
 
         .feature-orbit-center {
             position: absolute;
             top: 50%;
             left: 50%;
-            /* Translate needs to account for the element's own size */
             transform: translate(-50%, -50%);
             width: 200px; /* Adjusted size */
             height: 200px;
@@ -54,7 +51,6 @@
         }
 
         .feature-orbit-center:hover {
-             /* Slightly larger scale on hover */
             transform: translate(-50%, -50%) scale(1.1);
             background-color: rgba(79, 70, 229, 0.1);
             box-shadow: 0 15px 30px rgba(79, 70, 229, 0.3), 0 0 0 8px rgba(79, 70, 229, 0.1);
@@ -74,41 +70,38 @@
 
         .feature-orbit-item {
             position: absolute;
-            /* Center the item before transforming */
             top: 50%; /* Position relative to container center */
             left: 50%; /* Position relative to container center */
             width: 70px; /* Icon container size */
             height: 70px; /* Icon container size */
-            /* Margin offset is removed here, transform handles positioning */
-            /* margin: -35px 0 0 -35px; */
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             background-color: rgba(255, 255, 255, 0.6); /* Slightly more opaque */
-            transition: all 0.3s ease-in-out, opacity 0.3s ease; /* Added opacity transition */
+            /* Transition applied to background, shadow, border, opacity */
+            transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out, opacity 0.3s ease;
             cursor: pointer;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(79, 70, 229, 0.2); /* Indigo border */
             backdrop-filter: blur(5px);
             transform-origin: center center; /* Ensure scaling happens from the center */
-            /* transform set by JS */
+            /* transform set by JS animation */
+            will-change: transform; /* Hint browser that transform will change */
         }
 
-        /* New class for fading siblings */
-        .feature-orbit-container.is-hovering .feature-orbit-item:not(:hover) {
-            opacity: 0.6;
-            /* We need to re-apply the base transform + scale */
-            /* JS will handle combining transforms */
+        /* Sibling fade effect still useful */
+        .feature-orbit-container.is-hovering .feature-orbit-item:not(.hover-target) {
+             opacity: 0.6;
         }
 
-        .feature-orbit-item:hover {
-            /* transform is handled by JS now, just enhance visuals */
+        /* Hover style changes (scale handled by JS) */
+        .feature-orbit-item.hover-target {
             background-color: rgba(255, 255, 255, 0.9);
             box-shadow: 0 8px 16px rgba(79, 70, 229, 0.2);
             border-color: #4f46e5;
             z-index: 5; /* Bring hovered item slightly forward */
-            /* Scale is applied by JS */
+            opacity: 1; /* Ensure hovered item is fully opaque */
         }
 
         .feature-orbit-icon {
@@ -116,33 +109,21 @@
             height: 35px;
         }
 
-        /* Active state - more pronounced */
+        /* Active state - background/shadow changes */
         .feature-orbit-item.active {
-            /* Keep scale effect from JS, add glow */
             background-color: #10b981; /* Emerald green */
             box-shadow: 0 0 25px rgba(16, 185, 129, 0.8), 0 0 10px rgba(255, 255, 255, 0.5) inset;
             border-color: #6ee7b7;
-            animation: pulse 0.6s ease-out;
+            /* Removed pulse animation, scale handled by JS if needed */
         }
 
-        /* Pulse animation for click */
-        @keyframes pulse {
-            /* JS applies scale(1.2) on hover/active, so pulse relative to that */
-             0% { transform: scale(1.2); } /* Start from hover scale */
-             50% { transform: scale(1.4); } /* Pulse bigger */
-            100% { transform: scale(1.2); } /* Return to hover scale */
-            /* Note: Transform needs to be combined with positioning in JS */
-        }
-
-
-        /* Rotation animation for the center */
+        /* Rotation animation for the center (on click) */
         @keyframes rotateCenter {
-            from { transform: translate(-50%, -50%) rotate(0deg) scale(1.1); } /* Keep scale during rotation */
+            from { transform: translate(-50%, -50%) rotate(0deg) scale(1.1); }
             to { transform: translate(-50%, -50%) rotate(360deg) scale(1.1); }
         }
 
         .feature-orbit-center.rotate {
-            /* Use a shorter, smoother rotation */
             animation: rotateCenter 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
@@ -154,38 +135,53 @@
             </div>
 
         <div class="feature-orbit-item" data-feature="quiz">
-            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/zap.svg" alt="AI Quizzes" class="feature-orbit-icon" style="color: #f59e0b;"> </div>
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/zap.svg" alt="AI Quizzes" class="feature-orbit-icon" style="color: #f59e0b;">
+        </div>
         <div class="feature-orbit-item" data-feature="attendance">
-            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/check-circle-2.svg" alt="QR Attendance" class="feature-orbit-icon" style="color: #3b82f6;"> </div>
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/check-circle-2.svg" alt="QR Attendance" class="feature-orbit-icon" style="color: #3b82f6;">
+        </div>
         <div class="feature-orbit-item" data-feature="notes">
-            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/file-text.svg" alt="Smart Notes" class="feature-orbit-icon" style="color: #ec4899;"> </div>
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/file-text.svg" alt="Smart Notes" class="feature-orbit-icon" style="color: #ec4899;">
+        </div>
         <div class="feature-orbit-item" data-feature="tutor">
-            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/brain-circuit.svg" alt="AI Tutor" class="feature-orbit-icon" style="color: #10b981;"> </div>
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/brain-circuit.svg" alt="AI Tutor" class="feature-orbit-icon" style="color: #10b981;">
+        </div>
         <div class="feature-orbit-item" data-feature="analytics">
-            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/bar-chart-4.svg" alt="Analytics" class="feature-orbit-icon" style="color: #8b5cf6;"> </div>
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/bar-chart-4.svg" alt="Analytics" class="feature-orbit-icon" style="color: #8b5cf6;">
+        </div>
         <div class="feature-orbit-item" data-feature="flashcard">
-            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/layers.svg" alt="Flashcard Generator" class="feature-orbit-icon" style="color:#f97316"> </div>
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/layers.svg" alt="Flashcard Generator" class="feature-orbit-icon" style="color:#f97316">
+        </div>
         <div class="feature-orbit-item" data-feature="aiquiz">
-             <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/file-question.svg" alt="AI Quiz Generator" class="feature-orbit-icon" style="color:#84cc16"> </div>
+             <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/file-question.svg" alt="AI Quiz Generator" class="feature-orbit-icon" style="color:#84cc16">
+        </div>
         <div class="feature-orbit-item" data-feature="simulation">
-            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/computer.svg" alt="Simulations" class="feature-orbit-icon" style="color:#0ea5e9"> </div>
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/computer.svg" alt="Simulations" class="feature-orbit-icon" style="color:#0ea5e9">
+        </div>
     </div>
 
     <script>
-        // Get references to DOM elements
+        // --- DOM References ---
         const orbitContainer = document.getElementById('orbit-container');
         const orbitCenter = document.getElementById('orbit-center');
         const orbitItems = document.querySelectorAll('.feature-orbit-item');
 
-        // Store the default HTML content for the center element
+        // --- State Variables ---
+        let orbitRadius = 0; // Calculated orbit radius
+        let animationFrameId = null; // To control the animation loop
+        const rotationSpeed = 0.0005; // Adjust for faster/slower revolution (radians per ms)
+
+        // --- Initial Content ---
         const defaultCenterHTML = `
             <div class="feature-orbit-center-title">Classcheck.in</div>
             <p class="feature-orbit-subtitle">Your AI Classroom Assistant</p>
         `;
 
-        // Function to get the title for a feature based on its data attribute
+        // --- Helper Functions ---
+
+        // Get feature title
         function getFeatureTitle(feature) {
-            switch (feature) {
+             switch (feature) {
                 case "quiz": return "AI Quizzes";
                 case "attendance": return "QR Attendance";
                 case "notes": return "Smart Notes";
@@ -194,11 +190,11 @@
                 case "flashcard": return "Flashcards";
                 case "aiquiz": return "AI Quiz Gen";
                 case "simulation": return "Simulations";
-                default: return "Classcheck.in"; // Fallback
+                default: return "Classcheck.in";
             }
         }
 
-        // Function to update the central text element
+        // Update center text
         function updateCenterText(title, subtitle = null) {
             orbitCenter.innerHTML = `
                 <div class="feature-orbit-center-title">${title}</div>
@@ -206,131 +202,154 @@
             `;
         }
 
-        // Function to set the transform style for an item, combining position and scale
+        // Set transform (position + scale)
         function setItemTransform(item, x, y, scale = 1) {
-             // Apply the transform to position the item relative to the container center
-             // translate(-50%, -50%) centers the item *itself* on the calculated (x, y) point
-            item.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale})`;
+            // Check if scale is a valid number, default to 1 if not
+            const validScale = typeof scale === 'number' && !isNaN(scale) ? scale : 1;
+            item.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${validScale})`;
         }
 
-
-        // Function to position items circularly
-        function positionItems() {
-            // Use the central circle's size to determine the orbit radius
+        // Calculate initial positions and store base data
+        function calculateInitialPositions() {
             const centerRadius = orbitCenter.offsetWidth / 2;
-            // Get the size of the orbiting items (assuming they are uniform)
-            const itemRadius = orbitItems[0] ? orbitItems[0].offsetWidth / 2 : 35; // Default to 35 if needed
-            // Calculate the final orbit radius: center radius + item radius + a small gap
-            const gap = 10; // Adjust this value for spacing between center and items
-            const orbitRadius = centerRadius + itemRadius + gap;
+            const itemRadius = orbitItems[0] ? orbitItems[0].offsetWidth / 2 : 35;
+            const gap = 10;
+            orbitRadius = centerRadius + itemRadius + gap; // Store globally
 
             const itemCount = orbitItems.length;
-            const angleIncrement = (2 * Math.PI) / itemCount; // Angle between items
+            const angleIncrement = (2 * Math.PI) / itemCount;
 
             orbitItems.forEach((item, index) => {
-                // Calculate angle for this item (offset by -PI/2 to start at the top)
-                const angle = index * angleIncrement - Math.PI / 2;
-
-                // Calculate x and y coordinates relative to the container's center
+                const angle = index * angleIncrement - Math.PI / 2; // Start at top
                 const x = orbitRadius * Math.cos(angle);
                 const y = orbitRadius * Math.sin(angle);
 
-                // Apply the transform using the helper function (default scale is 1)
-                setItemTransform(item, x, y);
+                // Store initial angle and target scale on the element
+                item.dataset.initialAngle = angle;
+                item.dataset.targetScale = 1; // Initial scale is 1
 
-                // Store calculated position and angle for easy access later
-                item.dataset.baseX = x;
-                item.dataset.baseY = y;
-                item.dataset.angle = angle;
+                // Set initial transform
+                setItemTransform(item, x, y, 1);
             });
         }
 
-        // Set initial state
-        updateCenterText("Classcheck.in", "Your AI Classroom Assistant");
-        // Ensure positioning happens after styles are applied and layout is calculated
-        window.onload = () => {
-             positionItems(); // Position items on load
-        };
+        // --- Animation Loop ---
+        function animateOrbit(timestamp) {
+            // Calculate the current global rotation angle based on time
+            const currentGlobalAngle = (timestamp * rotationSpeed) % (2 * Math.PI);
 
+            orbitItems.forEach(item => {
+                // Get item's initial angle and target scale
+                const initialAngle = parseFloat(item.dataset.initialAngle);
+                const targetScale = parseFloat(item.dataset.targetScale);
 
-        // Add event listeners to each orbiting item
-        orbitItems.forEach(item => {
-            item.addEventListener('mouseenter', () => {
-                const feature = item.dataset.feature;
-                const title = getFeatureTitle(feature);
-                updateCenterText(title); // Update center text to feature title
-                orbitContainer.classList.add('is-hovering'); // Add class for sibling effects
+                // Calculate the new angle for this item
+                const newAngle = initialAngle + currentGlobalAngle;
 
-                // Apply hover scale using the setItemTransform function
-                const x = parseFloat(item.dataset.baseX);
-                const y = parseFloat(item.dataset.baseY);
-                setItemTransform(item, x, y, 1.2); // Scale to 1.2
+                // Calculate new x, y position based on the new angle
+                const x = orbitRadius * Math.cos(newAngle);
+                const y = orbitRadius * Math.sin(newAngle);
 
-                // Apply shrink effect to siblings
-                orbitItems.forEach(sibling => {
-                    if (sibling !== item) {
-                        const sx = parseFloat(sibling.dataset.baseX);
-                        const sy = parseFloat(sibling.dataset.baseY);
-                        setItemTransform(sibling, sx, sy, 0.9); // Scale down siblings
-                    }
+                // Apply the transform with the new position and target scale
+                setItemTransform(item, x, y, targetScale);
+            });
+
+            // Continue the animation loop
+            animationFrameId = requestAnimationFrame(animateOrbit);
+        }
+
+        // --- Event Listeners ---
+        function addEventListeners() {
+            orbitItems.forEach(item => {
+                // --- Hover Start ---
+                item.addEventListener('mouseenter', () => {
+                    const feature = item.dataset.feature;
+                    updateCenterText(getFeatureTitle(feature));
+                    orbitContainer.classList.add('is-hovering');
+
+                    // Set scale for hovered item and siblings
+                    orbitItems.forEach(sibling => {
+                        if (sibling === item) {
+                            sibling.dataset.targetScale = 1.2; // Scale up hovered
+                            sibling.classList.add('hover-target'); // Add class for style changes
+                        } else {
+                            sibling.dataset.targetScale = 0.9; // Scale down siblings
+                            sibling.classList.remove('hover-target');
+                        }
+                    });
+                });
+
+                // --- Hover End ---
+                item.addEventListener('mouseleave', () => {
+                    updateCenterText("Classcheck.in", "Your AI Classroom Assistant");
+                    orbitContainer.classList.remove('is-hovering');
+
+                    // Reset scale and class for all items
+                    orbitItems.forEach(anyItem => {
+                        anyItem.dataset.targetScale = 1;
+                        anyItem.classList.remove('hover-target');
+                    });
+                });
+
+                // --- Click ---
+                item.addEventListener('click', () => {
+                    const feature = item.dataset.feature;
+                    console.log(`Clicked on feature: ${feature}`);
+
+                    // Add active class for styling
+                    item.classList.add('active');
+                    // Optional: Briefly increase scale on click for a pulse effect
+                    // item.dataset.targetScale = 1.4;
+
+                    if ("vibrate" in navigator) navigator.vibrate(50);
+                    orbitCenter.classList.add('rotate');
+
+                    // Reset center rotation
+                    setTimeout(() => orbitCenter.classList.remove('rotate'), 1000);
+
+                    // Remove active class and reset scale after a short delay
+                    setTimeout(() => {
+                        item.classList.remove('active');
+                        // Reset scale based on current hover state
+                        const currentScale = item.matches(':hover') ? 1.2 : 1;
+                        item.dataset.targetScale = currentScale;
+                        // Ensure siblings are also correctly scaled if hover ended during click
+                         if (!item.matches(':hover')) {
+                             orbitItems.forEach(anyItem => {
+                                if (anyItem !== item) anyItem.dataset.targetScale = 1;
+                             });
+                         }
+
+                    }, 300); // Shorter delay to remove active style
+
+                    updateCenterText(getFeatureTitle(feature));
                 });
             });
 
-            item.addEventListener('mouseleave', () => {
-                updateCenterText("Classcheck.in", "Your AI Classroom Assistant"); // Restore default text
-                orbitContainer.classList.remove('is-hovering'); // Remove sibling effect class
+             // --- Resize ---
+             let resizeTimeout;
+             window.addEventListener('resize', () => {
+                 // Stop animation briefly during resize calculations
+                 if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                 // Debounce resize event
+                 clearTimeout(resizeTimeout);
+                 resizeTimeout = setTimeout(() => {
+                     calculateInitialPositions(); // Recalculate positions
+                     animationFrameId = requestAnimationFrame(animateOrbit); // Restart animation
+                 }, 250); // Wait 250ms after last resize event
+             });
+        }
 
-                 // Restore normal scale using the setItemTransform function for all items
-                 orbitItems.forEach(anyItem => {
-                    const x = parseFloat(anyItem.dataset.baseX);
-                    const y = parseFloat(anyItem.dataset.baseY);
-                    setItemTransform(anyItem, x, y, 1); // Restore scale 1
-                 });
-            });
+        // --- Initialization ---
+        function init() {
+            updateCenterText("Classcheck.in", "Your AI Classroom Assistant");
+            calculateInitialPositions(); // Calculate initial layout
+            addEventListeners(); // Add interaction listeners
+            animationFrameId = requestAnimationFrame(animateOrbit); // Start the animation
+        }
 
-            item.addEventListener('click', () => {
-                const feature = item.dataset.feature;
-                console.log(`Clicked on feature: ${feature}`); // Log the clicked feature
-
-                // --- Click Visual Feedback ---
-                // 1. Add 'active' class for pulse animation and styling
-                // Note: The pulse animation keyframes might need adjustment
-                // as they assume a specific starting scale. JS now handles scale directly.
-                item.classList.add('active');
-
-                // 2. Vibrate if supported
-                if ("vibrate" in navigator) {
-                    navigator.vibrate(50); // Short vibration
-                }
-
-                // 3. Rotate the center element
-                orbitCenter.classList.add('rotate');
-
-                // --- Reset Animations ---
-                // Remove rotation class after animation duration (1s)
-                setTimeout(() => {
-                    orbitCenter.classList.remove('rotate');
-                }, 1000);
-
-                // Remove active class shortly after pulse animation (0.6s)
-                // Also ensure scale returns to normal or hover state
-                setTimeout(() => {
-                    item.classList.remove('active');
-                    const x = parseFloat(item.dataset.baseX);
-                    const y = parseFloat(item.dataset.baseY);
-                    // If still hovering, maintain hover scale, otherwise return to normal
-                    const currentScale = item.matches(':hover') ? 1.2 : 1;
-                    setItemTransform(item, x, y, currentScale);
-
-                }, 600);
-
-                // Keep the center text updated briefly during the click animation
-                updateCenterText(getFeatureTitle(feature));
-            });
-        });
-
-        // Reposition items on window resize to maintain layout
-        window.addEventListener('resize', positionItems);
+        // Run initialization when the window is loaded
+        window.onload = init;
 
     </script>
 </body>
